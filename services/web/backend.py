@@ -26,7 +26,7 @@ def create(dataset_name, zip_file, client):
         'dataset_name': dataset_name,
         'file_path': str(file_path),
         'loop_number': str(i + 1)
-    } for i, file_path in enumerate(dataset_path.rglob('*')))
+    } for i, file_path in enumerate(dataset_path.rglob('*')) if file_path.is_file() and file_path.name[0] != '.')
 
 
 def get_datasets(client):
