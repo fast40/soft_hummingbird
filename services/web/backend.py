@@ -24,9 +24,9 @@ def create(dataset_name, zip_file, client):
 
     client[DATABASE][DATASETS_COLLECTION].insert_many({
         'dataset_name': dataset_name,
-        'file_path': str(file_path),
+        'file_path': str(file_path.relative_to(FILES_DIRECTORY)),
         'loop_number': str(i + 1)
-    } for i, file_path in enumerate(dataset_path.rglob('*')) if file_path.is_file() and file_path.name[0] != '.')
+    } for i, file_path in enumerate(file_path for file_path in dataset_path.rglob('*') if file_path.is_file() and file_path.name[0] != '.'))
 
 
 def get_datasets(client):
@@ -67,6 +67,10 @@ def get_file_path(response_id, loop_number: str, client):
         print(3)
         dataset_name = response['dataset_name']
 
+    print('---------------------')
+    print(dataset_name)
+    print(loop_number)
+    print('---------------------')
     file_path = client[DATABASE][DATASETS_COLLECTION].find_one({'dataset_name': dataset_name, 'loop_number': loop_number})['file_path']
 
     client[DATABASE][RESPONSES_COLLECTION].update_one({'response_id': response_id}, {'$set': {loop_number: file_path}})
