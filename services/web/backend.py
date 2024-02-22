@@ -9,7 +9,7 @@ DATABASE = 'survey'
 DATASETS_COLLECTION = 'datasets'
 RESPONSES_COLLECTION = 'responses'
 
-FILES_DIRECTORY = pathlib.Path('files')
+FILES_DIRECTORY = pathlib.Path('/files')
 
 
 # assuming this is used as intended, flask passes a temporary file to zip_file (so zip_file is not a path but the actual contents of a file)
