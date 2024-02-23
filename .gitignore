@@ -4,6 +4,6 @@ __pycache__
 db
 files
 *.pem
-video_batches
+video_batches*
 *.zip
 examples

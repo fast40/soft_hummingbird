@@ -5,7 +5,8 @@
     </head>
     <body>
         <form action="/upload" method="post" enctype="multipart/form-data">
-            <input type="text" name="dataset_name" required>
+            <input type="text" name="dataset_name" placeholder="dataset_name" required>
+            <input type="text" name="survey_id" placeholder="survey_id" required>
             <input type="file" name="zip_file" required>
             <input type="submit">
         </form>

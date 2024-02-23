@@ -13,7 +13,7 @@ FILES_DIRECTORY = pathlib.Path('/files')
 
 
 # assuming this is used as intended, flask passes a temporary file to zip_file (so zip_file is not a path but the actual contents of a file)
-def create(dataset_name, zip_file, client):
+def create(dataset_name, survey_id, zip_file, client):
     dataset_path = FILES_DIRECTORY.joinpath(dataset_name)
 
     if dataset_path.exists():
@@ -24,6 +24,7 @@ def create(dataset_name, zip_file, client):
 
     client[DATABASE][DATASETS_COLLECTION].insert_many({
         'dataset_name': dataset_name,
+        'survey_id': survey_id,
         'file_path': str(file_path.relative_to(FILES_DIRECTORY)),
         'loop_number': str(i + 1)
     } for i, file_path in enumerate(file_path for file_path in dataset_path.rglob('*') if file_path.is_file() and file_path.name[0] != '.'))
@@ -33,8 +34,8 @@ def get_datasets(client):
     return client[DATABASE][DATASETS_COLLECTION].distinct('dataset_name')
 
 
-def pick_response_dataset(client):
-    dataset_names = client[DATABASE][DATASETS_COLLECTION].distinct('dataset_name')
+def pick_response_dataset(survey_id, client):
+    dataset_names = client[DATABASE][DATASETS_COLLECTION].find({'survey_id': survey_id}).distinct('dataset_name')
 
     # TODO: this can and probably should be done with an aggregation pipeline
     # this basically gets the number of uses on each dataset as indicated by the responses
@@ -53,12 +54,12 @@ def pick_response_dataset(client):
     return dataset_choice
 
 
-def get_file_path(response_id, loop_number: str, client):
+def get_file_path(response_id, loop_number: str, survey_id: str, client):
     response = client[DATABASE][RESPONSES_COLLECTION].find_one({'response_id': response_id})
 
     if response is None:
         print(1)
-        dataset_name = pick_response_dataset(client)
+        dataset_name = pick_response_dataset(survey_id, client)  # this is the only time survey id is used. It just is used to put the response into a dataset_name
         client[DATABASE][RESPONSES_COLLECTION].insert_one({'response_id': response_id, 'dataset_name': dataset_name})
     elif loop_number in response:
         print(2)
