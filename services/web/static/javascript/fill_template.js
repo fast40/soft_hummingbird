@@ -1,6 +1,6 @@
 const QUESTION_NUMBER = 1;  // <- Change this to set the question number
 
-const embedded_data_answer = "value" + QUESTION_NUMBER + "_";  // e.g. value1_1 (last digit is set later)
+const embedded_data_value = "value" + QUESTION_NUMBER + "_";  // e.g. value1_1 (last digit is set later)
 const embedded_data_rank = "rank" + QUESTION_NUMBER + "_";  // e.g. rank1_1 (last digit is set later)
 const embedded_data_error = "error" + QUESTION_NUMBER + "_";  // e.g. error1_1 (last digit is set later)
 const embedded_data_person = "person" + QUESTION_NUMBER + "_";  // e.g. person1_1 (last digit is set later)
