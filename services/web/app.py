@@ -1,6 +1,8 @@
-from flask import Flask, Response, request, render_template, redirect, abort
+from flask import Flask, Response, request, render_template, redirect, abort, url_for
 import pymongo
 
+import datasets
+import services
 import backend
 # TODO: either decide that this is stupid and fix it or remove this message
 from helpers import url_bool
@@ -11,9 +13,71 @@ client = pymongo.MongoClient(backend.MONGO_URL, connect=False)
 app = Flask(__name__)
 
 
+
 @app.route('/')
 def index():
-    return render_template('index.html', datasets=backend.get_datasets(client))
+    with open('static/javascript/fill_template.js') as file:
+        javascript_code = file.read()
+
+    with open('templates/template.html') as file:
+        html_code = file.read()
+
+    return render_template('index.html', html_code=html_code, javascript_code=javascript_code)
+
+
+@app.route('/test')
+def test():
+    url = request.args.get('url', 'http://localhost')
+
+    return render_template('test.html', url=url)
+
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('datasets.html',
+        file_datasets=datasets.get_file_datasets(client),
+        table_datasets=datasets.get_table_datasets(client)
+    )
+
+
+@app.route('/create-dataset', methods=['POST'])
+def create_dataset():
+    dataset_name = request.form.get('dataset_name')
+    dataset_type = request.form.get('dataset_type')
+
+    # this object is a wrapper around a tempfile.SpooledTemporaryFile, so it contains the actual zip file data
+    zip_file = request.files.get('zip_file')  
+
+    if dataset_type == 'file':
+        datasets.create_file_dataset(dataset_name, zip_file, client)
+    elif dataset_type == 'table':
+        datasets.create_table_dataset(dataset_name, zip_file, client)
+    else:
+        abort(400, 'Incorrect dataset type. This should never happen; if it does please notify someone.')
+
+    return redirect(url_for('index'))
+
+
+@app.route('/delete-dataset')
+def delete_dataset():
+    dataset_name = request.args.get('dataset_name')
+    dataset_type = request.args.get('dataset_type')
+
+    if dataset_type == 'file':
+        datasets.delete_file_dataset(dataset_name, client)
+    elif dataset_type == 'table':
+        datasets.delete_table_dataset(dataset_name, client)
+    else:
+        abort(400, 'Incorrect dataset type. This should never happen; if it does please notify someone.')
+
+    return redirect(url_for('index'))
+
+
+@app.route('/query-dataset')
+def query_dataset():
+    question_number = request.args.get('question_number', int)
+
+    return services.jgetter(client, int(question_number))
 
 
 @app.route('/upload', methods=['POST'])

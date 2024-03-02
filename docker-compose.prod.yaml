@@ -5,7 +5,7 @@ services:
     container_name: web
     build: ./services/web
     volumes:
-      - ./files:/files
+      - ./datasets:/datasets
     expose:
       - 8000
     command: gunicorn --bind 0.0.0.0:8000 --workers 3 app:app
@@ -18,7 +18,7 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-      - ./files:/files
+      - ./datasets:/datasets
     ports:
       - 80:80
       - 443:443
